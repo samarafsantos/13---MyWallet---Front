@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { BiPlusCircle, BiMinusCircle } from 'react-icons/bi';
 import { RiLogoutBoxRLine } from 'react-icons/ri';
@@ -13,26 +13,22 @@ export default function Log(){
     const {logAdd} = useContext(UserContext);
     const {logSub} = useContext(UserContext);
     const [error, setError] = useState("");
+    const [total, setTotal] = useState("");
 
-
-    console.log(user);
     const history = useHistory();
     
     useEffect(()=>{
         getLog();
-    }, []);
-    
-    // useEffect(()=>{
-    //     getLog();
-    // }, [logAdd, logSub]);
+        getTotal();
+    }, [logAdd, logSub]);
 
     function getLog(){
-        console.log(JSON.stringify(user, null, 4))
         axios.get("http://localhost:3000/api/log", {headers: {Authorization: `Bearer ${user.token}`}}).
         then((response)=>{
             if (!response.data) return setError('User not found');
             console.log(response.data);
             setLog(response.data);
+            getTotal(response.data);
         }).catch((error)=>{
             console.log(error);
             const { response } = error;
@@ -40,6 +36,25 @@ export default function Log(){
         });
     }
 
+    function getTotal(info){
+        let sum = 0;
+        let sub = 0;
+        if(info!==undefined){
+            for(let i=0; i<info.length; i++){
+            
+            if(info[i].type=="add"){
+                console.log("entrou aqui")
+                console.log(info[i].value);
+                sum+=parseInt(info[i].value);
+            }else{
+                sub+=parseInt(info[i].value);
+            }
+        }
+        console.log("pos", sum);
+        console.log("neg", sub);
+        setTotal(sum-sub);
+        }
+    }
     function logout(){
         axios.post("http://localhost:3000/api/logout", {}, {headers: {Authorization: `Bearer ${user.token}`}}).
         then((response)=>{
@@ -50,6 +65,16 @@ export default function Log(){
             if (response.data.error) return setError(response.data.error);
         });
     }
+    
+    function logFormat(l) { 
+        let d1 = l.split("T");
+        let d2 = d1[0].split("-");
+        var d3 = d2.reverse();
+        var d4 = d3[0]+"-"+d3[1];
+        console.log(d4);
+        return d4;
+    }
+
 
     return (
         <LogContainer>
@@ -59,18 +84,34 @@ export default function Log(){
             </Top>
             <LogsList>
                 {log.length!==0 ? 
-                <ul>{log.map(l=><li>{l}</li>)}</ul>
+                <ul style={{width: '90%', margin: '10px auto'}}>{log.map(l => 
+                    <Line>
+                        <p className="date">{logFormat(l.date)}</p>
+                        <p className="description">{l.description}</p>
+                        <p className="value">{l.value}</p>
+                    </Line>)}</ul>
                 : <p>Não há registros de entrada ou saída</p>}
+                <Total>
+                    <p>SALDO</p>
+                    {total > 0 ? 
+                    <p className="positive">R$ {total}</p>:
+                    <p className="negative">R$ {total}</p>
+                    }
+                </Total>
             </LogsList>
             <ButtonContainer>
-                <Button>
-                    <BiPlusCircle />
-                    <p>Nova <br/>entrada</p>
-                </Button>
-                <Button>
-                    <BiMinusCircle />
-                    <p>Nova <br/>saída</p>
-                </Button>
+                <Link to="/addLog">
+                    <Button>
+                        <BiPlusCircle />
+                        <p>Nova <br/>entrada</p>
+                    </Button>
+                </Link>
+                <Link to="/subLog">
+                    <Button>
+                        <BiMinusCircle />
+                        <p>Nova <br/>saída</p>
+                    </Button>
+                </Link>
             </ButtonContainer>
         </LogContainer>
     );
@@ -88,16 +129,39 @@ const Top = styled.div`
     }
 `;
 
+const Line = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin: 5px;
+    .description{
+        color: black;
+    }
+    .value{
+        color: green;
+    }
+    .date, .value{
+        width:20%;
+    }
+`;
+
 const LogsList = styled.div`
     width: 80%;
     background: #FFF;
     color: gray;
     height: 450px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-between;
+    p{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    ul{
+        align-items: flex-start;
+    }
+    
     border-radius: 5px;
-
 `;
 const LogContainer = styled.div`
     font-family: 'Raleway', sans-serif;
@@ -122,6 +186,23 @@ const LogContainer = styled.div`
     }
 `;
 
+const Total = styled.div`
+    display: flex;
+    justify-content: space-between;
+    font-size: 17px;
+    font-weight: bold;
+    color: black;
+    width: 90%;
+    height: 30px;
+    margin: 15px;
+    .positive{
+        color: green;
+    }
+    .negative{
+        color: red;
+    }
+`;
+
 const ButtonContainer = styled.div`
     display: flex;
     height: 100px;
@@ -131,11 +212,13 @@ const ButtonContainer = styled.div`
     svg{
         font-size:25px;
     }
+    a{
+        width: 45%;
+    }
 `;
 
 const Button = styled.div`
     background: #A328D6;
-    width: 45%;
     font-weight: bold;
     display: flex;
     flex-direction: column;

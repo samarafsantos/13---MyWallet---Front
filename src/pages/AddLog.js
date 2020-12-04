@@ -6,27 +6,21 @@ import axios from 'axios';
 import UserContext from '../contexts/UserContext';
 
 export default function SignIn() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState('');
     const {user, setUser} = useContext(UserContext);
-    const [error, setError] = useState("");
+    const {logAdd, setLogAdd} = useContext(UserContext);
+    const [num, setNum] = useState("");
+    const [description, setDescription] = useState("");
     const history = useHistory();   
-
-    useEffect(() => {
-        if (!user) history.push(`/log`);
-    }, [user]);
+    const [error, setError] = useState("");
   
     function onSubmit(e){
         e.preventDefault();
-        axios.post("http://localhost:3000/api/sign-in", {email, password}).
+        console.log("foi");
+        axios.post("http://localhost:3000/api/entry", {num, description}, {headers: {Authorization: `Bearer ${user.token}`}}).
         then((response)=>{
             if (!response.data) return setError('User not found');
-            setUser({
-            id: response.data.id,
-            name: response.data.name,
-            email: response.data.email,
-            token: response.data.token,
-            });
+            console.log(response);
+            setLogAdd(!logAdd);
             history.push(`/log`);
         }).catch((error)=>{
             const { response } = error;
@@ -35,34 +29,35 @@ export default function SignIn() {
     }
 
     return (
-        <SignContainer>
-        <h1>My Wallet</h1>
-        <SignInForm onSubmit={onSubmit} >
-            <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            name="email"
-            placeholder="Email"
-            required
-            />
-            <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            name="password"
-            placeholder="Password"
-            required
-            />
-            <Button>Entrar</Button>
-            {error && <ErrorBox>{error}</ErrorBox>}
-        </SignInForm>
-            <Link to="/register">Primeira vez? Cadastre-se!</Link>
-        </SignContainer>
+        <NewEntryContainer>
+            <h1>Nova entrada</h1>
+            <EntryForm onSubmit={onSubmit} >
+                <input
+                type="number"
+                value={num}
+                min="0.01"
+                step="0.01"
+                onChange={(e) => setNum(e.target.value)}
+                name="Value"
+                placeholder="Valor"
+                required
+                />
+                <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                name="description"
+                placeholder="Descrição"
+                required
+                />
+                <Button>Salvar Entrada</Button>
+                {error && <ErrorBox>{error}</ErrorBox>}
+            </EntryForm>
+        </NewEntryContainer>
     );
 }
 
-const SignContainer = styled.div`
+const NewEntryContainer = styled.div`
     font-family: 'Raleway', sans-serif;
     background: #8C11BE;
     color: #FFF;
@@ -71,11 +66,13 @@ const SignContainer = styled.div`
     text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     h1{
-        font-family: 'Saira Stencil One', cursive;
-        font-size:32px;
+        font-family: inherit;
+        margin: 30px;
+        font-weight: bold;
+        font-size: 30px;
     }
     a{
         color: inherit;
@@ -92,8 +89,8 @@ const Button = styled.button`
     border-radius: 4px;
     margin-bottom: 15px;
     padding: 0 16px;
-    width:250px;
-    height: 37px;
+    width: 90%;
+    height: 45px;
     line-height: 37px;
     font-size: 16px;
     background: #A328D6;
@@ -102,29 +99,26 @@ const Button = styled.button`
     font-weight: bold;
 `;
 
-const SignInForm = styled.form`
+const EntryForm = styled.form`
     font-family: 'Raleway', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 220px;
+    width: 90%;
+    margin: 0 auto;
     padding-top: 30px;
     color: inherit;
 
     input[type='text'],
-    input[type='email'],
-    input[type='password'] {
-        
+    input[type='number']{ 
         display: block;
         border: none;
         border-radius: 4px;
         margin-bottom: 15px;
         padding: 0 16px;
-        width: 100%;
-        height: 37px;
+        width: 90%;
+        height: 58px;
         line-height: 37px;
         font-size: 16px;
     }
