@@ -84,11 +84,15 @@ export default function Log(){
             </Top>
             <LogsList>
                 {log.length!==0 ? 
-                <ul style={{width: '90%', margin: '10px auto'}}>{log.map(l => 
+                <ul style={{width: '90%', margin: '10px auto'}}>{log.map(l =>
                     <Line>
                         <p className="date">{logFormat(l.date)}</p>
                         <p className="description">{l.description}</p>
-                        <p className="value">{l.value}</p>
+                        {l.type === "add" ? 
+                            <p className="positive">{l.value}</p>
+                            : <p className="negative">{l.value}</p>
+                        }
+                        
                     </Line>)}</ul>
                 : <p>Não há registros de entrada ou saída</p>}
                 <Total>
@@ -136,8 +140,11 @@ const Line = styled.div`
     .description{
         color: black;
     }
-    .value{
+    .positive{
         color: green;
+    }
+    .negative{
+        color: red;
     }
     .date, .value{
         width:20%;
