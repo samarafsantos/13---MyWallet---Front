@@ -1,18 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 
-// import { UserContext } from '../../contexts/UserContext';
+import UserContext from '../contexts/UserContext';
 
 export default function SignIn() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState('');
+    const {user, setUser} = useContext(UserContext);
+    const [error, setError] = useState("");
+    const history = useHistory();   
+
+    useEffect(() => {
+        if (!user) history.push(`/log`);
+    }, [user]);
   
+    function onSubmit(e){
+        e.preventDefault();
+        console.log("foi");
+        axios.post("http://localhost:3000/api/sign-in", {email, password}).
+        then((response)=>{
+            if (!response.data) return setError('User not found');
+            console.log(response);
+            setUser({
+            id: response.data.id,
+            name: response.data.name,
+            email: response.data.email,
+            token: response.data.token,
+            });
+            history.push(`/log`);
+        }).catch((error)=>{
+            const { response } = error;
+            if (response.data.error) return setError(response.data.error);
+        });
+    }
+
     return (
         <SignContainer>
         <h1>My Wallet</h1>
-        <SignInForm >
+        <SignInForm onSubmit={onSubmit} >
             <input
             type="email"
             value={email}
@@ -30,6 +57,7 @@ export default function SignIn() {
             required
             />
             <Button>Entrar</Button>
+            {error && <ErrorBox>{error}</ErrorBox>}
         </SignInForm>
             <Link to="/register">Primeira vez? Cadastre-se!</Link>
         </SignContainer>
@@ -106,4 +134,11 @@ const SignInForm = styled.form`
         font-family: 'Raleway', sans-serif;
         color: black;
     }
+`;
+
+const ErrorBox = styled.div`
+  padding-bottom: 15px;
+  font-size: 16px;
+  line-height: 20px;
+  color: #ea0358;
 `;
