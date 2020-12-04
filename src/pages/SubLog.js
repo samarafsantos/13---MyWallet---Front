@@ -15,11 +15,9 @@ export default function SignIn() {
   
     function onSubmit(e){
         e.preventDefault();
-        console.log("foi");
-        axios.post("http://localhost:3000/api/pullout", {num, description}, {headers: {Authorization: `Bearer ${user.token}`}}).
+        axios.post("https://sammy-my-wallet.herokuapp.com/api/pullout", {num, description}, {headers: {Authorization: `Bearer ${user.token}`}}).
         then((response)=>{
             if (!response.data) return setError('User not found');
-            console.log(response);
             setLogSub(!logSub);
             history.push(`/log`);
         }).catch((error)=>{

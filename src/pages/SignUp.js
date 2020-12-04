@@ -13,8 +13,7 @@ export default function SignUp() {
   
     function onSubmit(e){
         e.preventDefault();
-        console.log("foi2");
-        axios.post("http://localhost:3000/api/sign-up", {name, email, password, passwordConfirmation})
+        axios.post("https://sammy-my-wallet.herokuapp.com/api/sign-up", {name, email, password, passwordConfirmation})
         .then((response) => {
         if (response.status === 201) {
             return history.push('/');

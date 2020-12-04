@@ -23,14 +23,12 @@ export default function Log(){
     }, [logAdd, logSub]);
 
     function getLog(){
-        axios.get("http://localhost:3000/api/log", {headers: {Authorization: `Bearer ${user.token}`}}).
+        axios.get("https://sammy-my-wallet.herokuapp.com/api/log", {headers: {Authorization: `Bearer ${user.token}`}}).
         then((response)=>{
             if (!response.data) return setError('User not found');
-            console.log(response.data);
             setLog(response.data);
             getTotal(response.data);
         }).catch((error)=>{
-            console.log(error);
             const { response } = error;
             if (response.data.error) return setError(response.data.error);
         });
@@ -43,20 +41,16 @@ export default function Log(){
             for(let i=0; i<info.length; i++){
             
             if(info[i].type=="add"){
-                console.log("entrou aqui")
-                console.log(info[i].value);
                 sum+=parseInt(info[i].value);
             }else{
                 sub+=parseInt(info[i].value);
             }
         }
-        console.log("pos", sum);
-        console.log("neg", sub);
         setTotal(sum-sub);
         }
     }
     function logout(){
-        axios.post("http://localhost:3000/api/logout", {}, {headers: {Authorization: `Bearer ${user.token}`}}).
+        axios.post("https://sammy-my-wallet.herokuapp.com/api/logout", {}, {headers: {Authorization: `Bearer ${user.token}`}}).
         then((response)=>{
             if (!response.data) return setError('User not found');
             history.push('/');
@@ -71,7 +65,6 @@ export default function Log(){
         let d2 = d1[0].split("-");
         var d3 = d2.reverse();
         var d4 = d3[0]+"-"+d3[1];
-        console.log(d4);
         return d4;
     }
 

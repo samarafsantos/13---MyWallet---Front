@@ -18,7 +18,7 @@ export default function SignIn() {
   
     function onSubmit(e){
         e.preventDefault();
-        axios.post("http://localhost:3000/api/sign-in", {email, password}).
+        axios.post("https://sammy-my-wallet.herokuapp.com/api/sign-in", {email, password}).
         then((response)=>{
             if (!response.data) return setError('User not found');
             setUser({
